@@ -59,50 +59,60 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     // MARK: - ARSCNViewDelegate
     
-    //Called when the app recognizes a new plane.
+    //Called when the app recognizes a new plane and creates a new node at that plane.
+    //We will attach our own nodes to this node at lines 73 and 76.
+    //The anchor contains information about the new plane.
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) { //p. 475
         
         guard let planeAnchor: ARPlaneAnchor = anchor as? ARPlaneAnchor else {
-            return;   //We're interested only in plane anchors.
+            return; //We're interested only in plane anchors, not oyther kinds of anchors.
         }
         
         let floor: SCNNode = createFloor(planeAnchor: planeAnchor); //argument added, p. 477
         node.addChildNode(floor);   //p. 476
         
         let ship: SCNNode = createShip(planeAnchor: planeAnchor);
-        node.addChildNode(ship);   //p. 480
+        node.addChildNode(ship);    //p. 480
         
-        let alignmentNames: [String] = [
-            "horizonal",   //0 ARPlaneAnchor.Alignment.horizontal
-            "vertical"     //1 ARPlaneAnchor.Alignment.vertical
-        ];
+        var alignmentName: String = "";
         
-        let classificationName: String;
-        
-        switch planeAnchor.classification {
-        case .none:
-            classificationName = "none";
-        case .wall:
-            classificationName = "wall";
-        case .floor:
-            classificationName = "floor";
-        case .ceiling:
-            classificationName = "ceiling";
-        case .table:
-            classificationName = "table";
-        case .seat:
-            classificationName = "seat";
+        switch planeAnchor.alignment {
+        case .horizontal:
+            alignmentName = "horizontal";   //perpendicular to gravity
+        case .vertical:
+            alignmentName = "vertical";     //parallel to gravity
         }
         
-        //Get the position of the plane.
+        //Get the position of the plane's anchor.
         let column3: simd_float4 = planeAnchor.transform.columns.3;
-        let positionOfPlane: SCNVector3 = SCNVector3(column3.x, column3.y, column3.z);
+        let anchorPosition: SCNVector3 = SCNVector3(column3.x, column3.y, column3.z);
         
-        let alignmentName: String = alignmentNames[planeAnchor.alignment.rawValue];
-        print("A new \(alignmentName) plane discovered at altitude = \(positionOfPlane.y) (\(classificationName)).");
+        print(String(format: "A new %.2f by %.2f %@ plane discovered at altitude %.2f",
+            planeAnchor.extent.x, planeAnchor.extent.z, alignmentName, anchorPosition.y), terminator: "");
+        
+        if ARPlaneAnchor.isClassificationSupported {   //only on some devices
+            let classificationName: String;
+            switch planeAnchor.classification {
+            case .none:
+                classificationName = "none";
+            case .wall:
+                classificationName = "wall";
+            case .floor:
+                classificationName = "floor";
+            case .ceiling:
+                classificationName = "ceiling";
+            case .table:
+                classificationName = "table";
+            case .seat:
+                classificationName = "seat";
+            }
+            print(" (\(classificationName))");
+        }
+        
+        print(".");
     }
-    
+
     //Page 479: update a node created by createFloor or createShip.
 
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
