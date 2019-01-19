@@ -107,7 +107,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             case .seat:
                 classificationName = "seat";
             }
-            print(" (\(classificationName))");
+            print(" (\(classificationName))", terminator: "");
         }
         
         print(".");
