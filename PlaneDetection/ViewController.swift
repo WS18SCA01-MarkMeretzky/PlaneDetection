@@ -66,7 +66,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) { //p. 475
         
         guard let planeAnchor: ARPlaneAnchor = anchor as? ARPlaneAnchor else {
-            return; //We're interested only in plane anchors, not oyther kinds of anchors.
+            return; //We're interested only in plane anchors, not other kinds of anchors.
         }
         
         let floor: SCNNode = createFloor(planeAnchor: planeAnchor); //argument added, p. 477
